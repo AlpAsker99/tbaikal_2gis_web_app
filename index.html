@@ -1,43 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2GIS Map Picker for Telegram Bot</title>
+    <title>2GIS Map Picker</title>
     <meta charset="utf-8">
     <script src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full"></script>
     <style>
-        /* Reset default margins/paddings */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Prevents scrollbars */
-        }
-
-        /* Make the map container full-screen */
-        #map {
-            width: 100%;
-            height: 100vh; /* 100% of viewport height */
-            position: fixed; /* Ensures it stays in place */
-            top: 0;
-            left: 0;
-        }
-
-        /* Telegram Web App-specific adjustments */
-        body {
-            background: transparent;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        #map { width: 100%; height: 100vh; }
+        .locate-btn:hover { background-color: #f0f0f0 !important; }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
+        // Initialize Telegram Web App
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+            Telegram.WebApp.HeaderColor = "#ffffff";
+        }
+
+        // Initialize 2GIS Map
         DG.then(function() {
             const map = DG.map('map', {
                 center: [54.98, 82.89],
-                zoom: 13
+                zoom: 13,
+                maxZoom: 20,
+                minZoom: 10
             });
 
+            // Add "My Location" button
+            const locateButton = DG.control({ position: 'topright' });
+            locateButton.onAdd = function() {
+                const btn = DG.DomUtil.create('button', 'locate-btn');
+                btn.innerHTML = '📍 My Location';
+                btn.style.padding = '6px 12px';
+                btn.style.backgroundColor = 'white';
+                btn.style.border = '2px solid rgba(0,0,0,0.2)';
+                btn.style.cursor = 'pointer';
+                
+                btn.onclick = function() {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                            DG.marker([pos.coords.latitude, pos.coords.longitude])
+                                .addTo(map)
+                                .bindPopup("You are here!")
+                                .openPopup();
+                        },
+                        (err) => {
+                            alert("Error: " + err.message);
+                        }
+                    );
+                };
+                return btn;
+            };
+            locateButton.addTo(map);
+
+            // Handle map clicks
             let marker;
             map.on('click', function(e) {
                 if (marker) map.removeLayer(marker);
