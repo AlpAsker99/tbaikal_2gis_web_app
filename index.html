@@ -33,9 +33,9 @@
             const locateButton = DG.control({ position: 'topright' });
             locateButton.onAdd = function() {
                 const btn = DG.DomUtil.create('button', 'locate-btn');
-                btn.innerHTML = '📍 My Location';
-                btn.style.padding = '6px 12px';
-                btn.style.backgroundColor = 'white';
+                btn.innerHTML = '📍 Моя локация';
+                btn.style.padding = '18px 36px';
+                btn.style.backgroundColor = 'green';
                 btn.style.border = '2px solid rgba(0,0,0,0.2)';
                 btn.style.cursor = 'pointer';
                 
@@ -45,7 +45,7 @@
                             map.setView([pos.coords.latitude, pos.coords.longitude], 16);
                             DG.marker([pos.coords.latitude, pos.coords.longitude])
                                 .addTo(map)
-                                .bindPopup("You are here!")
+                                .bindPopup("Вы здесь!")
                                 .openPopup();
                         },
                         (err) => {
