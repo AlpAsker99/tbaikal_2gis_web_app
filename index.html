@@ -1,26 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>2GIS Map Picker</title>
+    <title>2GIS Map Picker for Telegram Bot</title>
+    <meta charset="utf-8">
     <script src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full"></script>
+    <style>
+        /* Reset default margins/paddings */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        /* Make the map container full-screen */
+        #map {
+            width: 100%;
+            height: 100vh; /* 100% of viewport height */
+            position: fixed; /* Ensures it stays in place */
+            top: 0;
+            left: 0;
+        }
+
+        /* Telegram Web App-specific adjustments */
+        body {
+            background: transparent;
+        }
+    </style>
 </head>
 <body>
-    <div id="map" style="width: 100%; height: 100%;"></div>
+    <div id="map"></div>
     <script>
         DG.then(function() {
-            const map = DG.map('map', { center: [54.98, 82.89], zoom: 13 });
-            let marker;
+            const map = DG.map('map', {
+                center: [54.98, 82.89],
+                zoom: 13
+            });
 
+            let marker;
             map.on('click', function(e) {
                 if (marker) map.removeLayer(marker);
                 marker = DG.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
                 
-                // Send data back to Telegram
-                Telegram.WebApp.sendData(JSON.stringify({
-                    lat: e.latlng.lat,
-                    lon: e.latlng.lng,
-                    address: "Selected location (fetch via 2GIS API if needed)"
-                }));
+                if (window.Telegram && Telegram.WebApp) {
+                    Telegram.WebApp.sendData(JSON.stringify({
+                        lat: e.latlng.lat,
+                        lon: e.latlng.lng,
+                        address: "Selected location"
+                    }));
+                }
             });
         });
     </script>
